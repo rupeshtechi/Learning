@@ -63,7 +63,7 @@ Also known as dynamic polymorphism or late binding, runtime polymorphism is the 
 Overloading – Same method name but different parameter list (compile-time polymorphism). A compile-time polymorphism feature called overloading allows an entity to have numerous implementations of the same name. Method overloading and operator overloading are two examples.
 
 Overriding – Same method name and parameters but redefined in a derived class using the override keyword (runtime polymorphism).**Overriding** is a form of runtime polymorphism where an entity with the same name but a different implementation is executed. It is implemented with the help of virtual functions.
-
+```
 // Overloading<br>
 public void Print(string msg) { }<br>
 public void Print(string msg, int count) { }<br>
@@ -76,6 +76,7 @@ public class BaseClass {<br>
 public class DerivedClass : BaseClass {<br>
       public override void Display() => Console.WriteLine("Derived Display");<br>
 }
+```
 
 ## Q. What is the difference between Overloading, hiding, shadowing and Overriding in OOP?
 
