@@ -82,6 +82,7 @@ public class DerivedClass : BaseClass {<br>
 ## Q What is Composition?
 Composition is an OOP principle where a class contains objects of other classes as part of its state, instead of inheriting from them.
 
+```
 class Engine
 {
     public void Start()
@@ -105,7 +106,7 @@ class Car
         Console.WriteLine("Car is running.");
     }
 }
-
+```
 ## Q What is the difference between Inheritance and Composition?
 | Aspect                          | Composition                           | Inheritance                       |
 | ------------------------------- | ------------------------------------- | --------------------------------- |
@@ -186,31 +187,34 @@ A virtual function is a function that is used to override a method of the parent
     - Must be overridden in any non-abstract derived class.
     - Can only exist inside an abstract class.
 <br>
-    abstract class Shape<br>
-    {<br>
-            public abstract void Draw(); // No body — must be overridden<br>
-    }<br>
-    class Circle : Shape<br>
-    {<br>
-            public override void Draw()<br>
-            {<br>
-                Console.WriteLine("Drawing a circle");<br>
-            }<br>
-    }<br>
-
+``` 
+    abstract class Shape
+    {
+        public abstract void Draw(); // No body — must be overridden<br>
+    }
+    class Circle : Shape
+    {
+        public override void Draw()
+        {
+            Console.WriteLine("Drawing a circle");
+        }
+    }
+```
 2. Virtual Function (Method)
    <br>A virtual method:
    - Has a default implementation in the base class.
    - Can be overridden (but doesn’t have to be) in derived classes.
    - The class that declares it does not have to be abstract.
 <br>
-abstract class Shape<br>
-{<br>
-    public virtual void Draw()  // Has a default implementation<br>
-    {<br>
-        Console.WriteLine("Drawing a generic shape");<br>
-    }<br>
-}<br>
+```
+abstract class Shape
+{
+    public virtual void Draw()  // Has a default implementation
+    {
+        Console.WriteLine("Drawing a generic shape");
+    }
+}
+```
 
 
 ## Q. What is the difference between Association, Aggregation, and Composition in OOP?
