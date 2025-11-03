@@ -685,3 +685,8 @@ services.AddDbContext<AppDbContext>(options =>
 Here,
 `EnableRetryOnFailure()`
 helps manage transient failures in cloud-based databases.
+
+
+## Q. is string a by refrence or byvalue ? and why 
+string is object but works as byvalue. It is immutable object, everytime you assign value , it allocates new memoery and and new isntace of object is created. MS has designed this as intention to corelate it with real world. 
+
