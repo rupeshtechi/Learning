@@ -148,6 +148,138 @@ Interface: Defines a contract (only method/property signatures). A class can imp
 | An abstract class can have final, non-final, static and non-static variables.	| The interface has only static and final variables. | 
 | Abstract class doesn't support multiple inheritance	| An interface supports multiple inheritance.| 
 
+## Q. When to use Interface and when Abstract class in real applications?
+**1. When to Use Interfaces**
+
+Use interfaces when you want to define behavioral contracts that multiple unrelated classes can share.
+
+Example: Shared capability
+```
+public interface ILogger
+{
+    void Log(string message);
+}
+
+public class FileLogger : ILogger
+{
+    public void Log(string message) => Console.WriteLine($"File log: {message}");
+}
+
+public class DatabaseLogger : ILogger
+{
+    public void Log(string message) => Console.WriteLine($"DB log: {message}");
+}
+```
+
+Both FileLogger and DatabaseLogger are not related by inheritance, but they share a common behavior.
+
+**Use Case:**
+- Defining plug-ins or service contracts
+- Decoupling systems (e.g., dependency injection)
+- When you need multiple inheritance of behavior
+
+**2. When to Use Abstract Classes**
+
+Use abstract classes when you want to provide a shared base with common logic or default behavior, but still enforce that subclasses must implement specific parts.
+
+Example: Common base with shared logic
+```
+public abstract class Shape
+{
+    public abstract double GetArea();
+
+    public void Describe()
+    {
+        Console.WriteLine("I am a shape.");
+    }
+}
+
+public class Circle : Shape
+{
+    public double Radius { get; set; }
+    public override double GetArea() => Math.PI * Radius * Radius;
+}
+```
+
+The Shape class:
+
+Provides shared behavior (Describe())
+
+Requires derived classes to implement GetArea()
+
+**Use Case:**
+- Base classes in frameworks (e.g., Stream, Controller, DbContext)
+- When you need shared state or fields
+- When you expect classes to be related hierarchically
+
+**3. Combine Both (Real-World Pattern)**
+
+Often, you combine them for flexibility.
+
+Example: ASP.NET Core logging system
+```
+public interface ILogger
+{
+    void Log(string message);
+}
+
+public abstract class BaseLogger : ILogger
+{
+    public abstract void Log(string message);
+
+    protected void WriteTimestamp()
+    {
+        Console.WriteLine(DateTime.Now);
+    }
+}
+```
+
+- ILogger defines what must be done,
+- BaseLogger defines how part of it could be done.
+- Concrete loggers inherit from BaseLogger and implement the details.
+
+## Q. Do abstract class have Constructors in C#?
+Abstract classes can have constructors
+
+Even though you cannot instantiate an abstract class directly,
+you can define a constructor inside it — and that constructor is called when a derived (non-abstract) class is created.
+
+Example:
+```
+public abstract class Animal
+{
+    public string Name { get; set; }
+
+    public Animal(string name)
+    {
+        Name = name;
+        Console.WriteLine("Animal constructor called");
+    }
+}
+
+public class Dog : Animal
+{
+    public Dog(string name) : base(name)
+    {
+        Console.WriteLine("Dog constructor called");
+    }
+}
+```
+## Q. Can you declare abstract methods as private in C#?
+No, you cannot declare abstract methods as private in C#. ❌
+
+Let’s look at why that’s the case, and what the valid alternatives are 👇
+
+1. What happens if you try it
+
+    If you write:
+    ```
+    public abstract class Animal
+    {
+        private abstract void Speak(); // ❌ Invalid!
+    }
+    ```
+
 ## Q. Is it always necessary to create objects from class?
 No. If the base class includes non-static methods, an object must be constructed. But no objects need to be generated if the class includes static methods. In this instance, you can use the class name to directly call those static methods.
 

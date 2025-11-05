@@ -690,3 +690,473 @@ helps manage transient failures in cloud-based databases.
 ## Q. is string a by refrence or byvalue ? and why 
 string is object but works as byvalue. It is immutable object, everytime you assign value , it allocates new memoery and and new isntace of object is created. MS has designed this as intention to corelate it with real world. 
 
+## Q. How can you gracefully cancel a running Task or thread? 
+The recommended pattern is to use a CancellationToken. You pass a CancellationToken to your Task or async method and check token.IsCancellationRequested inside the work. This cooperative cancellation avoids forcing a thread to stop. For example, pass a CancellationToken to Task.Run and call token.ThrowIfCancellationRequested() periodically. Avoid using deprecated methods like Thread.Abort, which can corrupt state
+
+## Q. What is Kestrel, and why would you use a reverse proxy (like IIS or Nginx) with it? 
+Kestrel is the high-performance, cross-platform web server for ASP.NET Core. It can serve HTTP requests directly, but in production it’s common to put it behind a reverse proxy (e.g. IIS, Nginx). The proxy can handle TLS termination, host multiple sites, and provide features like process management. Kestrel alone is fast, but a reverse proxy adds robustness (and Windows Authentication if needed) while still letting Kestrel handle the application layer.
+
+## Q. How would you implement multiple interfaces with the same method name in the same class?
+To implement multiple interfaces with the same method name, you would avoid implementation within the body of the function. Instead, you would explicitly provide the name of the interface to the body of the method. The compiler will understand which interface methods are being referred to, therefore resolving the issue.
+
+This can be seen in the following example:
+```
+interface myInterface1
+    	{
+        void Print();
+    	}
+    	interface myInterface2
+    	{
+        void Print();
+    	}
+    	class Student : myInterface1,
+        myInterface2
+    	{
+        void myInterface1.Print()
+        {
+            Console.WriteLine("For myInterface1 !!");
+        }
+        void myInterface2.Print()
+        {
+            Console.WriteLine("For myInterface2 !!");
+        }
+}
+```
+
+## Q. What is the static keyword?
+We use the static keyword to create a static class, a static method, or static properties.
+
+When we create a static class there can be only static data members and static methods in that class.
+
+Static means that we cannot create the instance of that class. That class can be used directly like ClassName.methodName.
+
+When there is a need for special functions, which are typical for all the instances of other classes, then we use static class.
+
+For example, there is a requirement to load some default application-level values. We create a static class with static functions. That class is then accessible to all other classes without creating any instance. It also shares the same data with all the classes.
+
+Refer to the below example:
+```
+public static class Setting
+    	{
+        public static int fetchDefault()
+        {
+            int maxAmount = 0;
+            //code to fetch and set the value from config or some file.
+            return maxAmount;
+        }
+    	}
+
+    	public class Sales
+    	{
+          //not required to create an instance.
+          int maxAmount = Setting.fetchDefault();
+}
+```
+
+## Q. Is it possible to prevent object creation of a class in C#?
+1. Make the constructor private
+
+This prevents external code from creating instances.
+```
+public class MyClass
+{
+    private MyClass()
+    {
+        // Constructor is private
+    }
+}
+```
+
+**Use case:** Singleton pattern, static utility classes, or factory-controlled instantiation.
+
+If you try:
+```
+var obj = new MyClass(); // ❌ Error: 'MyClass.MyClass()' is inaccessible
+```
+
+You can still allow creation internally (for example, from within a static method):
+```
+public static MyClass CreateInstance()
+{
+    return new MyClass();
+}
+```
+
+2. Make the class static
+
+A static class cannot be instantiated or inherited.
+```
+public static class MathHelper
+{
+    public static int Add(int a, int b) => a + b;
+}
+```
+
+The compiler enforces this automatically:
+```
+var m = new MathHelper(); // ❌ Error: Cannot create an instance of static class 'MathHelper'
+```
+3. Use an abstract class
+
+An abstract class cannot be directly instantiated, only inherited.
+```
+public abstract class Shape
+{
+    public abstract double GetArea();
+}
+
+var s = new Shape(); // ❌ Error: Cannot create an instance of the abstract class or interface 'Shape'
+```
+
+**Use case:** You want to force subclasses to implement behavior before instantiation.
+
+## Q. If base & child both class have constructors, which will be called first?
+When a derived class object is created, the base class constructor is called first, then the derived class constructor.
+
+## Q. What is “params” keyword? When to use params keyword in real applications?
+The params keyword in C# is a convenient feature that allows a method to accept a variable number of arguments of the same type. It’s commonly used when you don’t know in advance how many values will be passed to a method.
+```
+public void MethodName(params int[] numbers)
+{
+    foreach (int n in numbers)
+    {
+        Console.WriteLine(n);
+    }
+}
+```
+Usage:
+```
+MethodName(1, 2, 3, 4);       // Pass multiple arguments
+MethodName(10, 20);            // Pass fewer arguments
+MethodName();                  // Pass zero arguments
+```
+
+**Rules for params**
+1. Only one params parameter is allowed per method.
+2. The params parameter must be the last parameter in the method signature.
+3. The type must be a single-dimensional array.
+
+## Q. What are optional parameters in a method?
+yntax of Optional Parameters
+
+You define optional parameters by assigning default values in the method signature:
+```
+public void PrintMessage(string message, int times = 1, bool uppercase = false)
+{
+    for (int i = 0; i < times; i++)
+    {
+        string output = uppercase ? message.ToUpper() : message;
+        Console.WriteLine(output);
+    }
+}
+```
+## Q. What are named parameters in a method?
+Named parameters in C# allow you to specify the arguments of a method by the parameter names, instead of relying solely on their order. This improves readability and lets you skip optional parameters more easily.
+
+ou use the parameter name followed by a colon when calling a method:
+```
+public void PrintMessage(string message, int times = 1, bool uppercase = false)
+{
+    for (int i = 0; i < times; i++)
+    {
+        string output = uppercase ? message.ToUpper() : message;
+        Console.WriteLine(output);
+    }
+}
+```
+Calling with Named Parameters:
+```
+PrintMessage(message: "Hello World", times: 3, uppercase: true);
+PrintMessage(times: 2, message: "Hi"); // order doesn't matter
+PrintMessage(message: "Test");          // uses default for others
+```
+**Rules**
+
+1. Named parameters can appear anywhere, but once you use a positional argument after a named argument, all subsequent arguments must be named.
+```
+PrintMessage("Hello", uppercase: true, times: 3); // ✅ OK
+PrintMessage(uppercase: true, "Hello");          // ❌ Invalid
+```
+2. Can be used with optional parameters to skip some arguments.
+
+## Q. What is the difference between “var” and “dynamic” in C#?
+Both var and dynamic allow you to write less explicit type code, but they behave very differently.
+1. **var keyword**
+- Type inferred at compile-time.
+- Once inferred, the type is fixed — you cannot assign a value of a different type later.
+- Compiler knows the type, so you get IntelliSense and compile-time checking.
+```
+var number = 10;    // inferred as int
+number = 20;        // OK
+// number = "Hello"; // Error: Cannot assign string to int
+```
+
+2. **dynamic keyword**
+- Type is determined at runtime.
+- Compiler does not check types; all checks happen at runtime.
+- You can assign any type and call any member, but if it doesn’t exist, you get a runtime exception.
+```
+dynamic value = 10;
+value = "Hello";       // Allowed
+Console.WriteLine(value.Length); // 5, runtime resolves it
+
+dynamic obj = 5;
+// Console.WriteLine(obj.NonExistentMethod()); // Runtime error
+```
+- var → compile-time type inference, safe, type cannot change.
+- dynamic → runtime type, flexible, not safe, errors appear at runtime.
+
+## Q. What is the use of Yield keyword in C#?
+The yield keyword in C# is a powerful tool for creating iterators. It allows you to return elements one at a time from a method or property without creating a temporary collection. This can make your code more memory-efficient and readable, especially when working with large datasets or streams.
+
+1. How yield works
+
+- yield return → Returns the next element in the sequence without exiting the method.
+- yield break → Stops the iteration early.
+
+When a method contains yield, it does not execute immediately. Instead, it returns an enumerable object (IEnumerable or IEnumerator), and elements are produced on-demand when iterated.
+
+2. Syntax Example
+```
+using System;
+using System.Collections.Generic;
+
+public class Numbers
+{
+    public IEnumerable<int> GetEvenNumbers(int max)
+    {
+        for (int i = 0; i <= max; i++)
+        {
+            if (i % 2 == 0)
+                yield return i; // Returns one element at a time
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var numbers = new Numbers();
+        foreach (var n in numbers.GetEvenNumbers(10))
+        {
+            Console.WriteLine(n); // 0, 2, 4, 6, 8, 10
+        }
+    }
+}
+```
+3. Key Points
+
+Memory-efficient
+
+Doesn’t create a full collection in memory.
+
+Each element is generated as needed.
+
+Simpler code
+
+Avoids manually creating and returning a list or array.
+
+Supports lazy evaluation
+
+Useful for streams, large files, or database queries where you don’t want to load everything at once.
+
+4. Using yield break
+
+Stops the iteration early:
+```
+public IEnumerable<int> GetNumbersUntil(int max, int stop)
+{
+    for (int i = 0; i <= max; i++)
+    {
+        if (i > stop)
+            yield break; // Stop iteration
+        yield return i;
+    }
+}
+```
+5. When to Use yield
+Scenario	Why yield is useful
+Returning sequences one item at a time	No need for temporary collections
+Iterating large datasets or streams	Memory-efficient, lazy evaluation
+Infinite sequences	You can generate items indefinitely without storing them all
+Custom iterator logic	Cleaner and easier to implement than manual IEnumerator
+
+## Q. What is ORM? What are the different types of ORM?
+ORM stands for Object-Relational Mapping.
+
+It’s a programming technique that allows developers to interact with a relational database (like MySQL, PostgreSQL, or SQLite) using object-oriented programming languages (like Python, Java, C#, etc.) — without writing raw SQL queries.
+
+**What ORM Does**
+
+ORM maps objects in code to tables in the database:
+- Class ↔ Table
+- Object ↔ Row
+- Attribute ↔ Column
+
+So instead of writing:
+```
+SELECT * FROM users WHERE id = 1;
+```
+
+You can write in Python (for example, using SQLAlchemy or Django ORM):
+```
+user = User.objects.get(id=1)
+```
+
+This improves productivity, readability, and maintainability.
+
+**Benefits of ORM**
+
+1. **Abstraction** – You interact with database objects instead of SQL queries.
+2. **Portability** – Easier to switch between database systems.
+3. **Security** – Reduces SQL injection risks.
+4. **Productivity** – Faster development and fewer errors.
+
+C#/.NET ORMs: Entity Framework, Dapper
+
+## Q. What is Entity Framework?
+
+Entity Framework (EF) is an **Object-Relational Mapper (ORM)** developed by Microsoft for the **NET platform**.
+It allows developers to interact with a database **using .NET objects (C# classes)** instead of writing raw SQL queries.
+
+Entity Framework acts as a bridge between your C# code and the database.
+You work with objects, and EF automatically handles CRUD operations (Create, Read, Update, Delete) by generating SQL queries under the hood.
+
+For example:
+```
+var student = new Student { Name = "Alice" };
+context.Students.Add(student);
+context.SaveChanges();
+```
+
+EF will automatically translate this into:
+```
+INSERT INTO Students (Name) VALUES ('Alice');
+```
+
+**Key Features**
+1. **Eliminates SQL Queries** – Write queries using LINQ instead of SQL.
+2. **Database Independence** – Supports multiple databases (SQL Server, MySQL, PostgreSQL, SQLite, etc.).
+3. **Change Tracking** – Automatically keeps track of object changes for updates.
+4. **Lazy Loading** – Loads related data only when needed.
+5. **Migrations** – Manages database schema changes directly from your code.
+6. **Strongly Typed Queries** – Compile-time checking with LINQ.
+
+**Entity Framework Architecture**
+Entity Framework includes:
+- Entity Data Model (EDM) – Defines how classes map to database tables.
+- LINQ to Entities – Allows querying data using LINQ.
+- SQL – A SQL-like query language (less commonly used now).
+- Object Services – Handles object materialization, state tracking, and change detection.
+
+**Advantages of Entity Framework**
+- Simplifies database interaction.
+- Reduces boilerplate SQL code.
+- Supports multiple database systems.
+- Integrated with LINQ for powerful querying.
+- Automatic model synchronization through migrations.
+
+**Disadvantages**
+- Slightly slower than raw SQL (due to abstraction overhead).
+- Complex queries can be tricky to optimize.
+- Requires understanding of EF behaviors (e.g., lazy loading, tracking).
+
+## Q. What is meant by DBContext and DBSet?
+In Entity Framework (EF) or Entity Framework Core (EF Core), the two most fundamental concepts are DbContext and DbSet.
+They work together to connect your C# classes to your database tables.
+
+**1. DbContext**
+DbContext is the main class that manages the database connection, configuration, and interaction between your code and the database.
+
+Think of DbContext as a session with the database — it’s responsible for:
+- Tracking changes to your objects
+- Saving data to the database
+- Retrieving data from the database
+- Managing transactions and migrations
+
+```
+public class SchoolContext : DbContext
+{
+    public DbSet<Student> Students { get; set; }
+    public DbSet<Course> Courses { get; set; }
+}
+```
+
+Here, SchoolContext inherits from DbContext.
+It represents your database, and the properties (Students, Courses) represent tables.
+
+**What DbContext Does:**
+
+1. Opens a connection to the database.
+2. Translates LINQ queries into SQL queries.
+3. Tracks changes to entity objects.
+4. Saves changes back to the database with SaveChanges().
+5. Disposes resources automatically when done.
+Example Usage:
+```
+using (var context = new SchoolContext())
+{
+    var student = new Student { Name = "Alice" };
+    context.Students.Add(student);   // Stage new student for insert
+    context.SaveChanges();           // Execute SQL INSERT
+}
+```
+
+**2. DbSet**
+
+DbSet<TEntity> represents a collection of entities (a table in the database).
+
+Each DbSet corresponds to a table, and each entity (object) corresponds to a row in that table.
+```
+public class SchoolContext : DbContext
+{
+    public DbSet<Student> Students { get; set; }  // Table: Students
+}
+```
+
+Here:
+- Student → Entity class (defines the table structure)
+- DbSet<Student> → Collection representing the "Students" table
+
+**Usage:**
+```
+using (var context = new SchoolContext())
+{
+    // Read
+    var allStudents = context.Students.ToList();
+
+    // Insert
+    context.Students.Add(new Student { Name = "Bob" });
+    context.SaveChanges();
+
+    // Update
+    var student = context.Students.First();
+    student.Name = "Robert";
+    context.SaveChanges();
+
+    // Delete
+    context.Students.Remove(student);
+    context.SaveChanges();
+}
+```
+
+## Q. What is Middleware in ASP.NET Core? What is custom middleware?
+
+## Q. What is AddSingleton, AddSoped and AddTransient method?
+
+## Q. What is Request Delegate?
+
+## Q. What is Run(), Use() and Map() method?
+
+## Q. What are the types of Hosting in ASP.NET Core? What is In process and Out
+
+## Q. What is Kestrel? What is the difference between Kestrel and IIS?
+
+## Q. What is Routing? Explain attribute routing in ASP.NET Core?
+
+## Q. What is CORS? Why CORS restriction is required? Hot to fix CORS error?
+
+## Q. How to handle errors in ASP.NET Core?
+
+## Q. 
