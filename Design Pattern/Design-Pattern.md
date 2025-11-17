@@ -69,6 +69,9 @@ They are categorized in three groups: Creational, Structural, and Behavioral
 
 ## Q. What is Factory pattern? Why to use factory pattern? How to implement Factory method pattern?
 The Factory Method design pattern defines an interface for creating an object, but let subclasses decide which class to instantiate. This pattern lets a class defer instantiation to subclasses. 
+
+**When to use:** when a system must be open to new product types (exporters, connectors, device drivers, notification channels) and the creation logic varies by type, environment, or configuration.
+
 The classes and objects participating in this pattern include:
 
 - Product  (Page)
@@ -81,6 +84,12 @@ The classes and objects participating in this pattern include:
 - oncreteCreator  (Report, Resume)
    - overrides the factory method to return an instance of a ConcreteProduct.
 ```
+
+Example B — Notification channel abstraction for alerts
+Product: AlertSender (send(Alert))
+ConcreteProducts: EmailSender, SmsSender, PagerDutySender, InAppSender
+Factory decides channel based on patient preference, alert severity, or clinician on-call schedule.
+
 namespace Factory.NetOptimized;
 
 using static System.Console;
@@ -234,3 +243,151 @@ public class Report : Document
 
 ## Q. What is the Observer pattern, and how does C# implement it?
 The Observer pattern defines a one-to-many relationship: a subject maintains a list of observers and notifies them when its state changes. In .NET, this is commonly implemented using delegates and the event keyword. Clients subscribe to an event (backed by a delegate) on the subject. When the subject changes, it invokes the delegate, calling all registered handlers. An event is essentially an automatic notification that some action has occurred, built on delegates. Thus C#’s event construct encapsulates the Observer pattern.
+
+
+## Q. What is Builder pattern?
+what is the Builder pattern?
+
+Builder Pattern is a creational design pattern that lets you construct complex objects step by step.
+It separates the construction of an object from its representation, allowing the same construction process to create different representations.
+
+1. **When to use it:**
+
+When creating complex healthcare domain objects (like FHIR Bundles, claims, or clinical reports) that require multiple optional or dependent fields.
+
+When object construction involves validation, conditional fields, or multi-step aggregation.
+
+When you want immutable objects after creation.
+
+2. **Core structure (conceptual UML)**
+   
+| Role                | Description                               | Healthcare Analogy                                                                     |
+| ------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Builder**         | Abstract interface defining build steps   | e.g., `PatientBuilder` defines `setDemographics()`, `setIdentifiers()`, `setAddress()` |
+| **ConcreteBuilder** | Implements the steps to build the product | e.g., `FHIRPatientBuilder` builds a FHIR-compliant patient JSON                        |
+| **Director**        | Controls the building sequence            | e.g., `PatientDirector` orchestrates building from EHR source                          |
+| **Product**         | The final complex object                  | e.g., `PatientResource` or `FHIR Bundle`                                               |
+
+
+3. **Healthcare Example — Building a FHIR Patient Resource**
+
+- Healthcare data is often messy and conditional:
+- Some systems have patient names, others don’t.
+- Some have identifiers (MRN, SSN, etc.).
+- Some require addresses and contact details.
+  
+Instead of multiple constructors or telescoping parameters, a Builder provides a clean and controlled way to construct such objects.
+```
+public class Patient
+{
+    public string Id { get; private set; }
+    public string Name { get; private set; }
+    public string Gender { get; private set; }
+    public DateTime? BirthDate { get; private set; }
+    public string Address { get; private set; }
+    public string Telecom { get; private set; }
+
+    // Private constructor enforces creation only via Builder
+    private Patient() { }
+
+    // Nested Builder Class
+    public class Builder
+    {
+        private string _id;
+        private string _name;
+        private string _gender;
+        private DateTime? _birthDate;
+        private string _address;
+        private string _telecom;
+
+        public Builder WithId(string id)
+        {
+            _id = id;
+            return this;
+        }
+
+        public Builder WithName(string name)
+        {
+            _name = name;
+            return this;
+        }
+
+        public Builder WithGender(string gender)
+        {
+            _gender = gender;
+            return this;
+        }
+
+        public Builder WithBirthDate(DateTime birthDate)
+        {
+            _birthDate = birthDate;
+            return this;
+        }
+
+        public Builder WithAddress(string address)
+        {
+            _address = address;
+            return this;
+        }
+
+        public Builder WithTelecom(string telecom)
+        {
+            _telecom = telecom;
+            return this;
+        }
+
+        // The critical step — build the final immutable object
+        public Patient Build()
+        {
+            // Validation logic — healthcare-safe construction
+            if (string.IsNullOrWhiteSpace(_id))
+                throw new InvalidOperationException("Patient ID is required.");
+            if (string.IsNullOrWhiteSpace(_name))
+                throw new InvalidOperationException("Patient Name is required.");
+
+            return new Patient
+            {
+                Id = _id,
+                Name = _name,
+                Gender = _gender,
+                BirthDate = _birthDate,
+                Address = _address,
+                Telecom = _telecom
+            };
+        }
+    }
+}
+
+```
+**Client Code — Using the Builder**
+```
+public class Program
+{
+    public static void Main()
+    {
+        // Construct patient object step-by-step
+        Patient patient = new Patient.Builder()
+            .WithId("PAT-1001")
+            .WithName("Alice Johnson")
+            .WithGender("female")
+            .WithBirthDate(new DateTime(1985, 5, 21))
+            .WithAddress("123 Health St, Springfield")
+            .WithTelecom("+1-555-6789")
+            .Build();
+
+        Console.WriteLine($"FHIR Patient Resource:");
+        Console.WriteLine($"ID: {patient.Id}");
+        Console.WriteLine($"Name: {patient.Name}");
+        Console.WriteLine($"Gender: {patient.Gender}");
+        Console.WriteLine($"BirthDate: {patient.BirthDate:yyyy-MM-dd}");
+    }
+}
+
+```
+## Q. What is Prototype  pattern?
+
+## Q. What is Singleton pattern?
+
+
+## Q. What is Theroem 
+
